@@ -2,10 +2,9 @@
 
 # 🎓 AI Lecturer
 
-**AI Lecturer** is an intelligent learning assistant that converts educational resources such as **YouTube lectures, PDFs, and documents into structured notes and explanations** using Artificial Intelligence.
+**AI Lecturer** is an intelligent learning assistant that converts educational resources such as YouTube lectures, PDFs, and documents into structured notes and explanations using Artificial Intelligence.
 
-This project is designed especially for **students and engineering learners** to help them quickly understand lecture materials without manually writing notes.
-
+This project is designed especially for students and engineering learners to help them quickly understand lecture materials without manually writing notes.
 ---
 
 # 🚀 Features
