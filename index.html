@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="sky">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lecture Notes Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --radius: 14px; --radius-sm: 8px; }
+
+  /* ── THEMES ── */
+  [data-theme="sky"] {
+    --bg: #e8f4ff;
+    --surface: #ffffff;
+    --surface2: #d0e8ff;
+    --border: #a8d0f5;
+    --accent: #0084ff;
+    --accent-text: #ffffff;
+    --text: #0a2540;
+    --text-muted: #4a7090;
+    --btn-hover: #006ee0;
+  }
+  [data-theme="mint"] {
+    --bg: #e2faf0;
+    --surface: #ffffff;
+    --surface2: #c8f0de;
+    --border: #8fdcbe;
+    --accent: #00b87a;
+    --accent-text: #ffffff;
+    --text: #042e1e;
+    --text-muted: #3a7a5c;
+    --btn-hover: #009966;
+  }
+  [data-theme="coral"] {
+    --bg: #fff0ed;
+    --surface: #ffffff;
+    --surface2: #ffe0d8;
+    --border: #ffb8a8;
+    --accent: #ff4d2e;
+    --accent-text: #ffffff;
+    --text: #3a0a00;
+    --text-muted: #8a4030;
+    --btn-hover: #e03a1e;
+  }
+  [data-theme="violet"] {
+    --bg: #f0eaff;
+    --surface: #ffffff;
+    --surface2: #e0d4ff;
+    --border: #c0a8f8;
+    --accent: #7c3aed;
+    --accent-text: #ffffff;
+    --text: #1e0a40;
+    --text-muted: #5a3a8a;
+    --btn-hover: #6928d4;
+  }
+  [data-theme="sun"] {
+    --bg: #fff8e0;
+    --surface: #ffffff;
+    --surface2: #fff0c0;
+    --border: #f5d870;
+    --accent: #e8a000;
+    --accent-text: #ffffff;
+    --text: #2a1a00;
+    --text-muted: #7a5800;
+    --btn-hover: #cc8c00;
+  }
+
+  /* ── BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+
+  /* ── HEADER ── */
+  .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+
+  .tagline {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    margin-top: 0.4rem;
+  }
+
+  /* ── THEME PICKER ── */
+  .themes {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .theme-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    outline: none;
+  }
+  .theme-btn:hover { transform: scale(1.18); }
+  .theme-btn.active { border-color: var(--text); }
+  .theme-btn[data-t="sky"]    { background: #0084ff; }
+  .theme-btn[data-t="mint"]   { background: #00b87a; }
+  .theme-btn[data-t="coral"]  { background: #ff4d2e; }
+  .theme-btn[data-t="violet"] { background: #7c3aed; }
+  .theme-btn[data-t="sun"]    { background: #e8a000; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .card-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  /* ── INPUTS ── */
+  .input-row {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+
+  .file-label {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--surface2);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: border-color 0.2s;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .file-label:hover { border-color: var(--accent); color: var(--text); }
+  input[type="file"] { display: none; }
+
+  .text-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, background 0.3s;
+  }
+  .text-input::placeholder { color: var(--text-muted); }
+  .text-input:focus { border-color: var(--accent); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.75rem 1.4rem;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn.loading { opacity: 0.65; pointer-events: none; }
+
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .btn.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── DIVIDER ── */
+  .or {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    margin: 0.5rem 0;
+  }
+  .or::before, .or::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── OUTPUT ── */
+  .output-wrap {
+    display: none;
+    margin-top: 1.25rem;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .output-wrap.show { display: block; }
+
+  .output-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1rem;
+    background: var(--surface2);
+    border-bottom: 1.5px solid var(--border);
+  }
+  .output-bar-left {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+  .copy-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 0.25rem 0.65rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    letter-spacing: 0.08em;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  #output {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: var(--text);
+    padding: 1.25rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 420px;
+    overflow-y: auto;
+    margin: 0;
+  }
+  #output::-webkit-scrollbar { width: 5px; }
+  #output::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+  .empty svg { margin-bottom: 0.75rem; opacity: 0.35; }
+
+  footer {
+    text-align: center;
+    margin-top: 3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    opacity: 0.5;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 540px) {
+    .input-row { flex-direction: column; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="top-row">
+    <h1>Lecture <em>Notes</em><br>Generator</h1>
+    <div class="themes">
+      <button class="theme-btn active" data-t="sky"    title="Sky"    onclick="setTheme('sky')"></button>
+      <button class="theme-btn"        data-t="mint"   title="Mint"   onclick="setTheme('mint')"></button>
+      <button class="theme-btn"        data-t="coral"  title="Coral"  onclick="setTheme('coral')"></button>
+      <button class="theme-btn"        data-t="violet" title="Violet" onclick="setTheme('violet')"></button>
+      <button class="theme-btn"        data-t="sun"    title="Sun"    onclick="setTheme('sun')"></button>
+    </div>
+  </div>
+  <p class="tagline">Upload a PDF or paste a YouTube link — get smart notes instantly.</p>
+
+  <div class="card">
+    <div class="card-label">PDF Upload</div>
+    <div class="card-title">Upload a Lecture PDF</div>
+    <div class="input-row">
+      <label class="file-label" for="file">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span id="fileName">Choose PDF…</span>
+      </label>
+      <input type="file" id="file" accept=".pdf" onchange="updateFileName(this)">
+      <button class="btn" id="pdfBtn" onclick="uploadPDF()">
+        <div class="spinner"></div><span>Generate Notes</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="or">or</div>
+
+  <div class="card">
+    <div class="card-label">YouTube</div>
+    <div class="card-title">Paste a YouTube Lecture Link</div>
+    <div class="input-row">
+      <input class="text-input" type="text" id="youtubeLink" placeholder="https://youtube.com/watch?v=…">
+      <button class="btn" id="ytBtn" onclick="getYouTubeNotes()">
+        <div class="spinner"></div><span>Generate Notes</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="output-wrap" id="outputWrap">
+    <div class="output-bar">
+      <span class="output-bar-left">notes_output.md</span>
+      <button class="copy-btn" onclick="copyOutput()">COPY</button>
+    </div>
+    <pre id="output"></pre>
+  </div>
+
+  <div class="empty" id="emptyState">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6M9 16h6M9 8h2M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
+    <p>Your generated notes will appear here.</p>
+  </div>
+
+  <footer>AI Lecture Notes Generator · Built with ♥</footer>
+</div>
+
+<script>
+  const API_BASE = "http://127.0.0.1:8000"; // Your FastAPI backend
+
+  /* ── THEME ── */
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+    localStorage.setItem('ln-theme', t);
+  }
+  (function(){ const s = localStorage.getItem('ln-theme'); if(s) setTheme(s); })();
+
+  /* ── FILE NAME ── */
+  function updateFileName(input) {
+    document.getElementById('fileName').textContent = input.files[0]?.name || 'Choose PDF…';
+  }
+
+  /* ── SHOW OUTPUT ── */
+  function showOutput(text) {
+    const wrap = document.getElementById('outputWrap');
+    const pre  = document.getElementById('output');
+    pre.textContent = '';
+    wrap.classList.add('show');
+    document.getElementById('emptyState').style.display = 'none';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Typewriter effect
+    let i = 0;
+    const speed = 8;
+    function type() {
+      if (i < text.length) {
+        pre.textContent += text.charAt(i++);
+        setTimeout(type, speed);
+      }
+    }
+    type();
+  }
+
+  function showError(msg) {
+    const wrap = document.getElementById('outputWrap');
+    document.getElementById('output').textContent = `⚠️ Error\n\n${msg}`;
+    wrap.classList.add('show');
+    document.getElementById('emptyState').style.display = 'none';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function setLoading(id, on) { document.getElementById(id).classList.toggle('loading', on); }
+
+  /* ── PDF UPLOAD ── */
+  async function uploadPDF() {
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert('Please select a PDF file first.');
+      return;
+    }
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Only PDF files are supported.');
+      return;
+    }
+
+    setLoading('pdfBtn', true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`${API_BASE}/upload-pdf`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showError(err.detail || err.error || `Server error (${res.status}). Please try again.`);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.notes) {
+        showOutput(data.notes);
+      } else {
+        showError('No notes returned from server. Check your backend.');
+      }
+
+    } catch (err) {
+      showError('Could not reach the server.\nMake sure your backend is running at ' + API_BASE);
+    } finally {
+      setLoading('pdfBtn', false);
+    }
+  }
+
+  /* ── YOUTUBE NOTES ── */
+  async function getYouTubeNotes() {
+    const url = document.getElementById('youtubeLink').value.trim();
+
+    if (!url) {
+      alert('Please paste a YouTube link first.');
+      return;
+    }
+    if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+      alert('Please enter a valid YouTube URL.');
+      return;
+    }
+
+    setLoading('ytBtn', true);
+    try {
+      const res = await fetch(`${API_BASE}/youtube-notes?url=${encodeURIComponent(url)}`);
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showError(err.detail || err.error || `Server error (${res.status}). Please try again.`);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.notes) {
+        showOutput(data.notes);
+      } else {
+        showError('No notes returned from server. Check your backend.');
+      }
+
+    } catch (err) {
+      showError('Could not reach the server.\nMake sure your backend is running at ' + API_BASE);
+    } finally {
+      setLoading('ytBtn', false);
+    }
+  }
+
+  /* ── COPY ── */
+  function copyOutput() {
+    navigator.clipboard.writeText(document.getElementById('output').textContent).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'COPIED!';
+      setTimeout(() => btn.textContent = 'COPY', 2000);
+    });
+  }
+</script>
+</body>
+</html>
